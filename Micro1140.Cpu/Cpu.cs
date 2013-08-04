@@ -66,6 +66,12 @@ namespace Micro1140.Cpu
                 case 6:
                     // index mode
                     return ReadMem1(regs[rn] + imm);
+                case 7:
+                    {
+                        // deferred index mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        return ReadMem1(ofs + imm);
+                    }
                 default:
                     throw new NotImplementedException();
             }
@@ -110,6 +116,12 @@ namespace Micro1140.Cpu
                 case 6:
                     // index mode
                     return ReadMem2(regs[rn] + imm);
+                case 7:
+                    {
+                        // deferred index mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        return ReadMem2(ofs + imm);
+                    }
                 default:
                     throw new NotImplementedException();
             }
@@ -159,6 +171,13 @@ namespace Micro1140.Cpu
                     // index mode
                     WriteMem1(regs[rn] + imm, value);
                     break;
+                case 7:
+                    {
+                        // deferred index mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem1(ofs + imm, value);
+                        break;
+                    }
                 default:
                     throw new NotImplementedException();
             }
@@ -206,6 +225,13 @@ namespace Micro1140.Cpu
                     // index mode
                     WriteMem2(regs[rn] + imm, value);
                     break;
+                case 7:
+                    {
+                        // deferred index mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem2(ofs + imm, value);
+                        break;
+                    }
                 default:
                     throw new NotImplementedException();
             }

@@ -314,5 +314,59 @@ namespace Micro1140.CpuTests
             Assert.WordAt(cpu, 0x0642, 0x1234);
         }
         #endregion Addressing mode 6 (index)
+
+        #region Addressing mode 7 (deferred index)
+        public void Test_Mode7_Read1()
+        {
+            cpu.Registers[0] = 0x0710;
+            cpu.PhysicalMemory[0x0710] = 0x18;
+            cpu.PhysicalMemory[0x0710 + 1] = 0x07;
+            cpu.PhysicalMemory[0x071A] = 0x34;
+            cpu.PhysicalMemory[0x071A + 1] = 0x12;
+            byte r0 = cpu.ReadOperand1(mode: 7, rn: 0, imm: 0x02);
+            Assert.AreEqual(r0, 0x34);
+            Assert.WordAt(cpu, 0x0710, 0x0718);
+            Assert.Reg(cpu, 0, 0x0710);
+        }
+
+        public void Test_Mode7_Read2()
+        {
+            cpu.Registers[0] = 0x0720;
+            cpu.PhysicalMemory[0x0720] = 0x28;
+            cpu.PhysicalMemory[0x0720 + 1] = 0x07;
+            cpu.PhysicalMemory[0x072A] = 0x34;
+            cpu.PhysicalMemory[0x072A + 1] = 0x12;
+            ushort r0 = cpu.ReadOperand2(mode: 7, rn: 0, imm: 0x02);
+            Assert.AreEqual(r0, 0x1234);
+            Assert.WordAt(cpu, 0x0720, 0x0728);
+            Assert.Reg(cpu, 0, 0x0720);
+        }
+
+        public void Test_Mode7_Write1()
+        {
+            cpu.Registers[0] = 0x0730;
+            cpu.PhysicalMemory[0x0730] = 0x38;
+            cpu.PhysicalMemory[0x0730 + 1] = 0x07;
+            cpu.PhysicalMemory[0x073A] = 0xAD;
+            cpu.PhysicalMemory[0x073A + 1] = 0xDE;
+            cpu.WriteOperand1(mode: 7, rn: 0, value: 0x12, imm: 0x02);
+            Assert.WordAt(cpu, 0x0730, 0x0738);
+            Assert.WordAt(cpu, 0x073A, 0xDE12);
+            Assert.Reg(cpu, 0, 0x0730);
+        }
+
+        public void Test_Mode7_Write2()
+        {
+            cpu.Registers[0] = 0x0740;
+            cpu.PhysicalMemory[0x0740] = 0x48;
+            cpu.PhysicalMemory[0x0740 + 1] = 0x07;
+            cpu.PhysicalMemory[0x074A] = 0xAD;
+            cpu.PhysicalMemory[0x074A + 1] = 0xDE;
+            cpu.WriteOperand2(mode: 7, rn: 0, value: 0x1234, imm: 0x02);
+            Assert.WordAt(cpu, 0x0740, 0x0748);
+            Assert.WordAt(cpu, 0x074A, 0x1234);
+            Assert.Reg(cpu, 0, 0x0740);
+        }
+        #endregion Addressing mode 7 (deferred index)
     }
 }
