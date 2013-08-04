@@ -56,6 +56,13 @@ namespace Micro1140.Cpu
                     // autodecrement mode
                     regs[rn] -= 1;
                     return ReadMem1(regs[rn]);
+                case 5:
+                    {
+                        // deferred autodecrement mode
+                        regs[rn] -= 2;
+                        ushort ofs = ReadMem2(regs[rn]);
+                        return ReadMem1(ofs);
+                    }
                 case 6:
                     // index mode
                     return ReadMem1(regs[rn] + imm);
@@ -93,6 +100,13 @@ namespace Micro1140.Cpu
                     // autodecrement mode
                     regs[rn] -= 2;
                     return ReadMem2(regs[rn]);
+                case 5:
+                    {
+                        // deferred autodecrement mode
+                        regs[rn] -= 2;
+                        ushort ofs = ReadMem2(regs[rn]);
+                        return ReadMem2(ofs);
+                    }
                 case 6:
                     // index mode
                     return ReadMem2(regs[rn] + imm);
@@ -133,6 +147,14 @@ namespace Micro1140.Cpu
                     regs[rn] -= 1;
                     WriteMem1(regs[rn], value);
                     break;
+                case 5:
+                    {
+                        // deferred autodecrement mode
+                        regs[rn] -= 2;
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem1(ofs, value);
+                        break;
+                    }
                 case 6:
                     // index mode
                     WriteMem1(regs[rn] + imm, value);
@@ -172,6 +194,14 @@ namespace Micro1140.Cpu
                     regs[rn] -= 2;
                     WriteMem2(regs[rn], value);
                     break;
+                case 5:
+                    {
+                        // deferred autodecrement mode
+                        regs[rn] -= 2;
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem2(ofs, value);
+                        break;
+                    }
                 case 6:
                     // index mode
                     WriteMem2(regs[rn] + imm, value);

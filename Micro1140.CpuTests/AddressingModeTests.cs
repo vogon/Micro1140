@@ -223,6 +223,60 @@ namespace Micro1140.CpuTests
         }
         #endregion Addressing mode 4 (autodecrement)
 
+        #region Addressing mode 5 (deferred autodecrement)
+        public void Test_Mode5_Read1()
+        {
+            cpu.Registers[0] = 0x0510;
+            cpu.PhysicalMemory[0x050E] = 0x18;
+            cpu.PhysicalMemory[0x050E + 1] = 0x05;
+            cpu.PhysicalMemory[0x0518] = 0x34;
+            cpu.PhysicalMemory[0x0518 + 1] = 0x12;
+            byte r0 = cpu.ReadOperand1(mode: 5, rn: 0);
+            Assert.AreEqual(r0, 0x34);
+            Assert.WordAt(cpu, 0x050E, 0x0518);
+            Assert.Reg(cpu, 0, 0x050E);
+        }
+
+        public void Test_Mode5_Read2()
+        {
+            cpu.Registers[0] = 0x0520;
+            cpu.PhysicalMemory[0x051E] = 0x28;
+            cpu.PhysicalMemory[0x051E + 1] = 0x05;
+            cpu.PhysicalMemory[0x0528] = 0x34;
+            cpu.PhysicalMemory[0x0528 + 1] = 0x12;
+            ushort r0 = cpu.ReadOperand2(mode: 5, rn: 0);
+            Assert.AreEqual(r0, 0x1234);
+            Assert.WordAt(cpu, 0x051E, 0x0528);
+            Assert.Reg(cpu, 0, 0x051E);
+        }
+
+        public void Test_Mode5_Write1()
+        {
+            cpu.Registers[0] = 0x0530;
+            cpu.PhysicalMemory[0x052E] = 0x38;
+            cpu.PhysicalMemory[0x052E + 1] = 0x05;
+            cpu.PhysicalMemory[0x0538] = 0xAD;
+            cpu.PhysicalMemory[0x0538 + 1] = 0xDE;
+            cpu.WriteOperand1(mode: 5, rn: 0, value: 0x12);
+            Assert.WordAt(cpu, 0x052E, 0x0538);
+            Assert.WordAt(cpu, 0x0538, 0xDE12);
+            Assert.Reg(cpu, 0, 0x052E);
+        }
+
+        public void Test_Mode5_Write2()
+        {
+            cpu.Registers[0] = 0x0540;
+            cpu.PhysicalMemory[0x053E] = 0x48;
+            cpu.PhysicalMemory[0x053E + 1] = 0x05;
+            cpu.PhysicalMemory[0x0548] = 0xAD;
+            cpu.PhysicalMemory[0x0548 + 1] = 0xDE;
+            cpu.WriteOperand2(mode: 5, rn: 0, value: 0x1234);
+            Assert.WordAt(cpu, 0x053E, 0x0548);
+            Assert.WordAt(cpu, 0x0548, 0x1234);
+            Assert.Reg(cpu, 0, 0x053E);
+        }
+        #endregion Addressing mode 5 (deferred autodecrement)
+
         #region Addressing mode 6 (index)
         public void Test_Mode6_Read1()
         {
