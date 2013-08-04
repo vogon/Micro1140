@@ -34,11 +34,24 @@ namespace Micro1140.Cpu
                 case 0:
                     // register mode
                     return (byte)(regs[rn] & 0xff);
+                case 1:
+                    // deferred register mode
+                    return ReadMem1(regs[rn]);
                 case 2:
-                    // autoincrement mode
-                    byte value = ReadMem1(regs[rn]);
-                    regs[rn] += 1;
-                    return value;
+                    {
+                        // autoincrement mode
+                        byte value = ReadMem1(regs[rn]);
+                        regs[rn] += 1;
+                        return value;
+                    }
+                case 3:
+                    {
+                        // deferred autoincrement mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        byte value = ReadMem1(ofs);
+                        regs[rn] += 2;
+                        return value;
+                    }
                 case 4:
                     // autodecrement mode
                     regs[rn] -= 1;
@@ -58,11 +71,24 @@ namespace Micro1140.Cpu
                 case 0:
                     // register mode
                     return regs[rn];
+                case 1:
+                    // deferred register mode
+                    return ReadMem2(regs[rn]);
                 case 2:
-                    // autoincrement mode
-                    ushort value = ReadMem2(regs[rn]);
-                    regs[rn] += 2;
-                    return value;
+                    {
+                        // autoincrement mode
+                        ushort value = ReadMem2(regs[rn]);
+                        regs[rn] += 2;
+                        return value;
+                    }
+                case 3:
+                    {
+                        // deferred autoincrement mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        ushort value = ReadMem2(ofs);
+                        regs[rn] += 2;
+                        return value;
+                    }
                 case 4:
                     // autodecrement mode
                     regs[rn] -= 2;
@@ -85,11 +111,23 @@ namespace Micro1140.Cpu
                     // register mode
                     regs[rn] = (ushort)((regs[rn] & 0xff00) | value);
                     break;
+                case 1:
+                    // deferred register mode
+                    WriteMem1(regs[rn], value);
+                    break;
                 case 2:
                     // autoincrement mode
                     WriteMem1(regs[rn], value);
                     regs[rn] += 1;
                     break;
+                case 3:
+                    {
+                        // deferred autoincrement mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem1(ofs, value);
+                        regs[rn] += 2;
+                        break;
+                    }
                 case 4:
                     // autodecrement mode
                     regs[rn] -= 1;
@@ -112,11 +150,23 @@ namespace Micro1140.Cpu
                     // register mode
                     regs[rn] = value;
                     break;
+                case 1:
+                    // deferred register mode
+                    WriteMem2(regs[rn], value);
+                    break;
                 case 2:
                     // autoincrement mode
                     WriteMem2(regs[rn], value);
                     regs[rn] += 2;
                     break;
+                case 3:
+                    {
+                        // deferred autoincrement mode
+                        ushort ofs = ReadMem2(regs[rn]);
+                        WriteMem2(ofs, value);
+                        regs[rn] += 2;
+                        break;
+                    }
                 case 4:
                     // autodecrement mode
                     regs[rn] -= 2;
