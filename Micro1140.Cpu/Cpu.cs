@@ -10,6 +10,21 @@ namespace Micro1140.Cpu
         private ushort psw;
         private bool n, z, v, c;
 
+        // opcode fields
+        private const ushort BOP        = 0xF000;       // binary opcode format         : 0b 1111 0000 0000 0000
+        private const ushort UOP_LO     = 0x0FC0;       // low part of unary opcode     : 0b 0000 1111 1100 0000
+        private const ushort SMODE      = 0x0E00;       // src addressing mode          : 0b 0000 1110 0000 0000
+        private const ushort RS         = 0x01C0;       // src reg                      : 0b 0000 0001 1100 0000
+        private const ushort DMODE      = 0x0038;       // dest addressing mode         : 0b 0000 0000 0011 1000
+        private const ushort RD         = 0x0007;       // dest reg                     : 0b 0000 0000 0000 0111
+
+        // opcode field shifts
+        private const int BOP_SHIFT = 12;
+        private const int UOP_LO_SHIFT = 6;
+        private const int SMODE_SHIFT = 9;
+        private const int RS_SHIFT = 6;
+        private const int DMODE_SHIFT = 3;
+
         public Cpu(uint physSize)
         {
             phys = new byte[physSize];
@@ -24,30 +39,30 @@ namespace Micro1140.Cpu
             // advance PC past opcode
             regs[7] += 2;
 
-            int bop = (opcode & 0xF000);
+            int bop = (opcode & BOP);
 
             switch (bop)
             {
                 case 0x0000:
-                    SingleOpExecuteLow(opcode);
+                    UnaryOpExecuteLow(opcode);
                     break;
                 case 0x8000:
-                    SingleOpExecuteHigh(opcode);
+                    UnaryOpExecuteHigh(opcode);
                     break;
                 default:
-                    DoubleOpExecute(opcode);
+                    BinaryOpExecute(opcode);
                     break;
             }
         }
 
-        private void SingleOpExecuteLow(ushort opcode)
+        private void UnaryOpExecuteLow(ushort opcode)
         {
-            int rd = (opcode & 0x0007);
-            int dmode = (opcode & 0x0038) >> 3;
+            int rd = (opcode & RD);
+            int dmode = (opcode & DMODE) >> DMODE_SHIFT;
 
             ushort imm = ReadMem2(regs[7] + 2);
 
-            switch ((opcode & 0x0FC0) >> 6)
+            switch ((opcode & UOP_LO) >> UOP_LO_SHIFT)
             {
                 case 0x00:
                     // HALT/WAIT/RTI/BPT/IOT/RESET/RTT
@@ -127,14 +142,14 @@ namespace Micro1140.Cpu
             }
         }
 
-        private void SingleOpExecuteHigh(ushort opcode)
+        private void UnaryOpExecuteHigh(ushort opcode)
         {
-            int rd = (opcode & 0x0007);
-            int dmode = (opcode & 0x0038) >> 3;
+            int rd = (opcode & RD);
+            int dmode = (opcode & DMODE) >> DMODE_SHIFT;
 
             ushort imm = ReadMem2(regs[7] + 2);
 
-            switch ((opcode & 0x0FC0) >> 6)
+            switch ((opcode & UOP_LO) >> UOP_LO_SHIFT)
             {
                 case 0x00:
                 // BPL
@@ -219,14 +234,14 @@ namespace Micro1140.Cpu
             }
         }
 
-        private void DoubleOpExecute(ushort opcode)
+        private void BinaryOpExecute(ushort opcode)
         {
-            int rs = (opcode & 0x01C0) >> 6, rd = (opcode & 0x0007);
-            int smode = (opcode & 0x0700) >> 9, dmode = (opcode & 0x0038) >> 3;
+            int rs = (opcode & RS) >> RS_SHIFT, rd = (opcode & RD);
+            int smode = (opcode & SMODE) >> SMODE_SHIFT, dmode = (opcode & DMODE) >> DMODE_SHIFT;
             
             ushort imm = ReadMem2(regs[7] + 2);
 
-            switch (opcode & 0xF000)
+            switch (opcode & BOP)
             {
                 case 0x1000:
                     {
