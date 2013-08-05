@@ -68,6 +68,10 @@ namespace Micro1140.CpuTests
             return suite;
         }
 
+        public static TestRunner Instance { get; set; }
+
+        public Type ExpectedExceptionType { get; set; }
+
         private void Run()
         {
             Type[] suites = GetAllTestSuiteTypes(assemblyUnderTest);
@@ -93,9 +97,18 @@ namespace Micro1140.CpuTests
                     }
                     catch (Exception e)
                     {
-                        Debug.Print(test.Name + ": failed (" + e.Message + ")");
-                        failed += 1;
+                        if (ExpectedExceptionType != null && ExpectedExceptionType.IsInstanceOfType(e))
+                        {
+                            passed += 1;
+                        }
+                        else
+                        {
+                            Debug.Print(test.Name + ": failed (" + e.Message + ")");
+                            failed += 1;
+                        }
                     }
+
+                    ExpectedExceptionType = null;
                 }
             }
 
@@ -105,7 +118,8 @@ namespace Micro1140.CpuTests
 
         public static void Main()
         {
-            (new TestRunner()).Run();
+            Instance = new TestRunner();
+            Instance.Run();
         }
     }
 }

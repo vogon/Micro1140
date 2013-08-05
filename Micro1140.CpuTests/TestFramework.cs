@@ -21,7 +21,14 @@ namespace Micro1140.CpuTests
 
         public static void AreEqual(int a, int b, string message = "")
         {
-            Assert.IsTrue(a == b, message: message);
+            string defaultMessage = "Assert.AreEqual: " + a.ToString() + " != " + b.ToString();
+
+            Assert.IsTrue(a == b, message: message ?? defaultMessage);
+        }
+
+        public static void ExpectException(Type t)
+        {
+            TestRunner.Instance.ExpectedExceptionType = t;
         }
     }
 }

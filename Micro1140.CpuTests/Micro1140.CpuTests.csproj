@@ -32,6 +32,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="AddressingModeTests.cs" />
+    <Compile Include="Ch3CodeTests.cs" />
     <Compile Include="CpuHelpers.cs" />
     <Compile Include="MemoryPrimitiveTests.cs" />
     <Compile Include="TestFramework.cs" />
@@ -42,11 +43,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="TestTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SPOT.Graphics" />
     <Reference Include="Microsoft.SPOT.Native">
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
