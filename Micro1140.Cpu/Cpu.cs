@@ -95,6 +95,7 @@ namespace Micro1140.Cpu
                 case 0x26:
                 case 0x27:
                     // JSR
+                    throw new NotImplementedException();
                 case 0x28:
                     {
                         // CLR
@@ -108,9 +109,23 @@ namespace Micro1140.Cpu
                         break;
                     }
                 case 0x29:
-                    // COM
+                // COM
+                    throw new NotImplementedException();
                 case 0x2A:
-                    // INC
+                    {
+                        // INC
+                        ushort value = ReadOperand2(mode: dmode, rn: rd, imm: imm, pendingWriteback: true);
+                        ushort result = (ushort)(value + 1);
+
+                        WriteOperand2(mode: dmode, rn: rd, value: result, imm: imm, afterRead: true);
+
+                        n = (result & 0x8000) != 0;
+                        z = (result == 0);
+                        v = (value == 0xffff);
+                        /* C flag unchanged */
+
+                        break;
+                    }
                 case 0x2B:
                     // DEC
                 case 0x2C:
@@ -193,10 +208,10 @@ namespace Micro1140.Cpu
                 case 0x29:
                     {
                         // COMB
-                        byte value = ReadOperand1(mode: dmode, rn: rd, imm: imm);
+                        byte value = ReadOperand1(mode: dmode, rn: rd, imm: imm, pendingWriteback: true);
                         byte result = (byte)~value;
 
-                        WriteOperand1(mode: dmode, rn: rd, value: result, imm: imm);
+                        WriteOperand1(mode: dmode, rn: rd, value: result, imm: imm, afterRead: true);
 
                         n = (result & 0x80) != 0;
                         z = (result == 0);
@@ -278,10 +293,10 @@ namespace Micro1140.Cpu
                     {
                         // ADD
                         ushort src = ReadOperand2(mode: smode, rn: rs, imm: imm);
-                        ushort dst = ReadOperand2(mode: dmode, rn: rd, imm: imm);
+                        ushort dst = ReadOperand2(mode: dmode, rn: rd, imm: imm, pendingWriteback: true);
                         int result = src + dst;
 
-                        WriteOperand2(mode: dmode, rn: rd, value: (ushort)result, imm: imm);
+                        WriteOperand2(mode: dmode, rn: rd, value: (ushort)result, imm: imm, afterRead: true);
 
                         n = (result & 0x8000) != 0;
                         z = (result & 0xFFFF) == 0;
@@ -324,10 +339,10 @@ namespace Micro1140.Cpu
                     {
                         // SUB
                         ushort src = ReadOperand2(mode: smode, rn: rs, imm: imm);
-                        ushort dst = ReadOperand2(mode: dmode, rn: rd, imm: imm);
+                        ushort dst = ReadOperand2(mode: dmode, rn: rd, imm: imm, pendingWriteback: true);
                         int result = dst - src;
 
-                        WriteOperand2(mode: dmode, rn: rd, value: (ushort)result, imm: imm);
+                        WriteOperand2(mode: dmode, rn: rd, value: (ushort)result, imm: imm, afterRead: true);
 
                         n = (result & 0x8000) != 0;
                         z = (result & 0xFFFF) == 0;
@@ -359,7 +374,7 @@ namespace Micro1140.Cpu
         #endregion access to processor state for tests
 
         #region read operands
-        internal byte ReadOperand1(int mode, int rn, ushort imm = 0)
+        internal byte ReadOperand1(int mode, int rn, ushort imm = 0, bool pendingWriteback = false)
         {
             switch (mode)
             {
@@ -373,7 +388,7 @@ namespace Micro1140.Cpu
                     {
                         // autoincrement mode
                         byte value = ReadMem1(regs[rn]);
-                        regs[rn] += 1;
+                        if (!pendingWriteback) regs[rn] += 1;
                         return value;
                     }
                 case 3:
@@ -381,7 +396,7 @@ namespace Micro1140.Cpu
                         // deferred autoincrement mode
                         ushort ofs = ReadMem2(regs[rn]);
                         byte value = ReadMem1(ofs);
-                        regs[rn] += 2;
+                        if (!pendingWriteback) regs[rn] += 2;
                         return value;
                     }
                 case 4:
@@ -409,7 +424,7 @@ namespace Micro1140.Cpu
             }
         }
 
-        internal ushort ReadOperand2(int mode, int rn, ushort imm = 0)
+        internal ushort ReadOperand2(int mode, int rn, ushort imm = 0, bool pendingWriteback = false)
         {
             switch (mode)
             {
@@ -423,7 +438,7 @@ namespace Micro1140.Cpu
                     {
                         // autoincrement mode
                         ushort value = ReadMem2(regs[rn]);
-                        regs[rn] += 2;
+                        if (!pendingWriteback) regs[rn] += 2;
                         return value;
                     }
                 case 3:
@@ -431,7 +446,7 @@ namespace Micro1140.Cpu
                         // deferred autoincrement mode
                         ushort ofs = ReadMem2(regs[rn]);
                         ushort value = ReadMem2(ofs);
-                        regs[rn] += 2;
+                        if (!pendingWriteback) regs[rn] += 2;
                         return value;
                     }
                 case 4:
@@ -461,7 +476,7 @@ namespace Micro1140.Cpu
         #endregion read operands
 
         #region write operands
-        internal void WriteOperand1(int mode, int rn, byte value, ushort imm = 0)
+        internal void WriteOperand1(int mode, int rn, byte value, ushort imm = 0, bool afterRead = false)
         {
             switch (mode)
             {
@@ -488,13 +503,13 @@ namespace Micro1140.Cpu
                     }
                 case 4:
                     // autodecrement mode
-                    regs[rn] -= 1;
+                    if (!afterRead) regs[rn] -= 1;
                     WriteMem1(regs[rn], value);
                     break;
                 case 5:
                     {
                         // deferred autodecrement mode
-                        regs[rn] -= 2;
+                        if (!afterRead) regs[rn] -= 2;
                         ushort ofs = ReadMem2(regs[rn]);
                         WriteMem1(ofs, value);
                         break;
@@ -515,7 +530,7 @@ namespace Micro1140.Cpu
             }
         }
 
-        internal void WriteOperand2(int mode, int rn, ushort value, ushort imm = 0)
+        internal void WriteOperand2(int mode, int rn, ushort value, ushort imm = 0, bool afterRead = false)
         {
             switch (mode)
             {
@@ -542,13 +557,13 @@ namespace Micro1140.Cpu
                     }
                 case 4:
                     // autodecrement mode
-                    regs[rn] -= 2;
+                    if (!afterRead) regs[rn] -= 2;
                     WriteMem2(regs[rn], value);
                     break;
                 case 5:
                     {
                         // deferred autodecrement mode
-                        regs[rn] -= 2;
+                        if (!afterRead) regs[rn] -= 2;
                         ushort ofs = ReadMem2(regs[rn]);
                         WriteMem2(ofs, value);
                         break;

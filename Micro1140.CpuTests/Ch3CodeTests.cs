@@ -81,5 +81,19 @@ namespace Micro1140.CpuTests
             Assert.Reg(cpu, 4, "020000");
             Assert.PC(cpu, "010002");
         }
+
+        public void Test_Ch333_1()
+        {
+            cpu.WriteMem2Oct("017774", "000000");
+            cpu.WriteRegOct(0, "017776");
+
+            cpu.WriteMem2Oct("001000", "005240");
+            cpu.WriteRegOct(7, "001000");
+            cpu.Next();
+
+            Assert.WordAt(cpu, "017774", "000001");
+            Assert.Reg(cpu, 0, "017774");
+            Assert.PC(cpu, "001002");
+        }
     }
 }

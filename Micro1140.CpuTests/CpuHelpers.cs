@@ -50,12 +50,12 @@ namespace Micro1140.CpuTests
             Assert.AreEqual(actual, expected, message: message);
         }
 
-        internal static void WordAt(Cpu.Cpu cpu, int ofs, ushort value)
+        internal static void WordAt(Cpu.Cpu cpu, int ofs, ushort expected)
         {
-            byte lo = (byte)(value & 0xff), hi = (byte)(value >> 8);
+            ushort actual = (ushort)((cpu.PhysicalMemory[ofs + 1] << 8) | cpu.PhysicalMemory[ofs]);
+            string message = "Assert.WordAt: M[" + ofs.ToString() + "] == " + actual.ToString() + " != " + expected.ToString();
 
-            Assert.AreEqual(cpu.PhysicalMemory[ofs], lo);
-            Assert.AreEqual(cpu.PhysicalMemory[ofs + 1], hi);
+            Assert.AreEqual(actual, expected, message: message);
         }
 
         internal static void Reg(Cpu.Cpu cpu, int rn, ushort expected)
